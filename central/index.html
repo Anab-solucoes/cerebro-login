@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#03050a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cérebro">
+<title>Central do Cérebro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root {
+    --bg: #03050a; --painel: #070b14; --cartao: #0a101d; --cartao2: #0f1729; --borda: #1c2742;
+    --texto: #eef2fb; --suave: #a7b2cc; --fraco: #6f7a96;
+    --ouro: #f2c14e; --ouro2: #d49a1f; --ouro-brilho: rgba(242,193,78,.45);
+    --azul: #2fa4ff; --azul2: #1a6fe0; --azul-brilho: rgba(47,164,255,.45);
+    --verde: #3ee6a0; --vermelho: #ff6b7a;
+    --raio: 16px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; color: var(--texto); font: 15px/1.55 -apple-system, "Segoe UI", system-ui, sans-serif;
+         background: radial-gradient(1200px 600px at 50% -200px, #0d1a35 0%, var(--bg) 60%) fixed, var(--bg);
+         padding-bottom: env(safe-area-inset-bottom); }
+
+  header { position: sticky; top: 0; z-index: 5; background: #04070dee; border-bottom: 1px solid #1a2440;
+           padding: calc(10px + env(safe-area-inset-top)) 28px 10px; display: flex; align-items: center; gap: 14px;
+           box-shadow: 0 1px 0 rgba(242,193,78,.15), 0 8px 24px rgba(0,0,0,.5); }
+  header img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+               box-shadow: 0 0 0 2px var(--ouro2), 0 0 14px var(--azul-brilho); }
+  header h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .4px; }
+  .dourado { background: linear-gradient(90deg, #ffe08a, var(--ouro), var(--ouro2)); -webkit-background-clip: text;
+             background-clip: text; color: transparent; }
+  .atualizado { margin-left: auto; color: var(--fraco); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .pulso { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); box-shadow: 0 0 8px var(--verde);
+           animation: piscar 2.4s ease-in-out infinite; }
+  @keyframes piscar { 50% { opacity: .35; } }
+
+  .hero { max-width: 1180px; margin: 0 auto; padding: 30px 28px 10px; display: grid;
+          grid-template-columns: 260px 1fr; gap: 34px; align-items: center; }
+  .anel { position: relative; width: 240px; height: 240px; border-radius: 50%; margin: auto; }
+  .anel img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: relative; z-index: 1; }
+  .anel::before { content: ""; position: absolute; inset: -6px; border-radius: 50%;
+                  background: conic-gradient(var(--ouro), var(--azul), var(--ouro2), var(--azul2), var(--ouro));
+                  animation: girar 14s linear infinite; }
+  .anel::after { content: ""; position: absolute; inset: -18px; border-radius: 50%;
+                 box-shadow: 0 0 40px var(--azul-brilho), 0 0 70px rgba(242,193,78,.25);
+                 animation: respirar 4s ease-in-out infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  @keyframes respirar { 50% { opacity: .45; } }
+  .hero h2.grande { font-size: 30px; margin: 0 0 4px; font-weight: 750; letter-spacing: .3px; text-transform: none; color: var(--texto); }
+  .hero h2.grande::after { display: none; }
+  .hero .sub { color: var(--suave); margin-bottom: 18px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 12px; }
+  .stat { background: linear-gradient(180deg, #0c1426, #08101e); border: 1px solid var(--borda); border-radius: 14px;
+          padding: 14px 16px; cursor: pointer; transition: box-shadow .2s, border-color .2s; }
+  .stat:hover { border-color: var(--azul); box-shadow: 0 0 16px var(--azul-brilho); }
+  .stat .num { font-size: 30px; font-weight: 750; line-height: 1.1; }
+  .stat .rot { color: var(--suave); font-size: 12.5px; text-transform: uppercase; letter-spacing: 1px; }
+  .stat.ouro .num { color: var(--ouro); text-shadow: 0 0 14px var(--ouro-brilho); }
+  .stat.azul .num { color: var(--azul); text-shadow: 0 0 14px var(--azul-brilho); }
+  .stat.ouro.ativo { border-color: var(--ouro2); box-shadow: 0 0 18px rgba(242,193,78,.25); }
+  .abrir { margin-top: 16px; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 18px 28px 80px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 13.5px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--ouro);
+       margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(47,164,255,.6), transparent); }
+  h2 .n { background: #10203d; color: var(--azul); border: 1px solid #1f3b6b; border-radius: 999px; padding: 0 9px; font-size: 12px; }
+  .vazio { color: var(--fraco); font-style: italic; padding: 8px 2px; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .cartao { position: relative; background: linear-gradient(180deg, var(--cartao2), var(--cartao)); border: 1px solid var(--borda);
+            border-radius: var(--raio); padding: 16px 18px; transition: border-color .2s, box-shadow .2s; min-width: 0; }
+  .cartao:hover { border-color: #2c5fa8; box-shadow: 0 0 0 1px rgba(47,164,255,.25), 0 0 22px rgba(47,164,255,.18); }
+  .destaque .cartao { border-color: rgba(242,193,78,.35); box-shadow: 0 0 18px rgba(242,193,78,.08); }
+  .destaque .cartao::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px;
+                              background: linear-gradient(var(--ouro), var(--azul)); box-shadow: 0 0 10px var(--ouro-brilho); }
+  .topo { display: flex; gap: 7px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #0e1830; color: var(--suave); border: 1px solid #1a2847; }
+  .tag.proj { color: var(--azul); border-color: #1f3b6b; }
+  .tag.vez { color: var(--ouro); border-color: #4a3a12; }
+  .titulo { font-size: 16.5px; font-weight: 650; margin: 2px 0 8px; overflow-wrap: anywhere; }
+  .meta { color: var(--fraco); font-size: 12.5px; margin-bottom: 10px; }
+  .sintese { background: #050912; border: 1px solid #16213b; border-radius: 12px; padding: 12px 14px;
+             font-size: 14px; color: #d3dbee; max-height: 260px; overflow: auto; overflow-wrap: anywhere; }
+  .sintese p { margin: 0 0 8px; }
+  .sintese b { color: var(--ouro); }
+  .sintese code { color: var(--azul); }
+  .acoes { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; font-size: 14px; border-radius: 10px; padding: 9px 14px; cursor: pointer;
+           border: 1px solid #22345a; background: #0c1426; color: var(--texto); transition: box-shadow .2s, border-color .2s; }
+  button:hover { border-color: var(--azul); box-shadow: 0 0 12px var(--azul-brilho); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.pri { background: linear-gradient(180deg, #ffd56b, var(--ouro2)); border-color: var(--ouro); color: #1a1205; font-weight: 650; }
+  button.pri:hover { box-shadow: 0 0 16px var(--ouro-brilho); }
+  button.ok { color: var(--verde); border-color: #155a43; }
+  button.no { color: var(--vermelho); border-color: #5a1f2a; }
+  button.link { background: none; border: none; color: var(--azul); padding: 4px 2px; }
+  button.link:hover { box-shadow: none; text-decoration: underline; }
+  .debate { margin-top: 12px; border-top: 1px dashed #22345a; padding-top: 10px; display: none; }
+  .debate.on { display: block; }
+  .fala { margin-bottom: 12px; padding-left: 10px; border-left: 2px solid #1d2c4d; }
+  .fala .quem { font-weight: 650; font-size: 13px; color: var(--azul); }
+  .fala .quem i { color: var(--fraco); font-style: normal; font-weight: 400; margin-left: 6px; }
+  .fala .corpo { font-size: 13.5px; color: #c9d2e6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .lista .cartao { padding: 14px 16px; }
+  .linha-dec { display: flex; justify-content: space-between; gap: 10px; padding: 10px 4px; border-bottom: 1px solid #141f37; }
+  .linha-dec b { color: var(--texto); }
+  .linha-dec span { color: var(--fraco); font-size: 12.5px; white-space: nowrap; }
+  .aviso { max-width: 1180px; margin: 14px auto 0; padding: 0 28px; }
+  .aviso .cartao { border-color: rgba(47,164,255,.45); font-size: 14px; color: var(--suave); }
+  .aviso b { color: var(--texto); }
+
+  .fundo { position: fixed; inset: 0; background: rgba(1,3,8,.78); display: none; align-items: center; justify-content: center; z-index: 20; padding: 16px; }
+  .fundo.on { display: flex; }
+  .modal { background: linear-gradient(180deg, #0d1528, #070c17); border: 1px solid rgba(242,193,78,.45); border-radius: 18px;
+           padding: 22px; width: min(620px, 100%); max-height: 92vh; overflow: auto;
+           box-shadow: 0 0 30px rgba(47,164,255,.2), 0 0 60px rgba(242,193,78,.1); }
+  .modal h3 { margin: 0 0 4px; color: var(--ouro); }
+  .modal .sub { color: var(--suave); font-size: 13px; margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: var(--suave); margin: 10px 0 5px; }
+  textarea, select, input { width: 100%; background: #040810; color: var(--texto); border: 1px solid #22345a;
+                     border-radius: 10px; padding: 10px; font: inherit; font-size: 16px; }
+  textarea:focus, select:focus, input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 12px var(--azul-brilho); }
+  textarea { min-height: 90px; resize: vertical; }
+  .toast { position: fixed; bottom: calc(22px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: #0c1426;
+           border: 1px solid var(--ouro2); padding: 11px 18px; border-radius: 12px; display: none; z-index: 30; max-width: 90vw;
+           box-shadow: 0 0 18px rgba(242,193,78,.25); }
+  .toast.on { display: block; }
+  .toast.erro { border-color: var(--vermelho); color: var(--vermelho); box-shadow: 0 0 18px rgba(255,107,122,.25); }
+
+  #login { min-height: 100vh; display: none; place-items: center; padding: 16px; }
+  #login.on { display: grid; }
+  #login .cartao { width: 100%; max-width: 420px; text-align: center; }
+  #login img { width: 120px; height: 120px; border-radius: 50%; box-shadow: 0 0 0 2px var(--ouro2), 0 0 24px var(--azul-brilho); }
+  #login p { color: var(--suave); }
+  #login button { width: 100%; margin-top: 12px; }
+  #app { display: none; }
+  #app.on { display: block; }
+
+  @media (max-width: 760px) {
+    header, main, .hero, .aviso { padding-left: 16px; padding-right: 16px; }
+    header { padding-top: calc(10px + env(safe-area-inset-top)); }
+    .hero { grid-template-columns: 1fr; text-align: center; gap: 20px; padding-top: 22px; }
+    .anel { width: 150px; height: 150px; }
+    .hero h2.grande { justify-content: center; }
+    header h1 { font-size: 16px; white-space: nowrap; }
+    .atualizado { font-size: 11px; text-align: right; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .grade { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .anel::before, .anel::after, .pulso { animation: none; } }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="cartao">
+    <img src="cerebro.jpg" alt="">
+    <div style="font-size:22px;font-weight:700;margin:14px 0 4px">Central do <span class="dourado">Cérebro</span></div>
+    <div id="login-corpo"></div>
+  </div>
+</div>
+
+<div id="app">
+<header>
+  <img src="cerebro.jpg" alt="">
+  <h1>Central do <span class="dourado">Cérebro</span></h1>
+  <div class="atualizado"><span class="pulso"></span><span id="atualizado">conectando…</span></div>
+</header>
+
+<div class="aviso" id="aviso-instalar" hidden><div class="cartao">
+  📲 <b>Para receber notificações no iPhone:</b> toque em <b>Compartilhar</b> (o quadrado com a seta) → <b>Adicionar à Tela de Início</b>.
+  Depois abra a Central pelo ícone novo e toque em <b>Ativar notificações</b>.
+</div></div>
+<div class="aviso" id="aviso-push" hidden><div class="cartao">
+  🔔 <b>Receba um aviso quando o Cérebro precisar de você.</b>
+  <div class="acoes"><button class="pri" id="btn-push">Ativar notificações</button></div>
+</div></div>
+
+<div class="hero">
+  <div class="anel"><img src="cerebro.jpg" alt="Cérebro"></div>
+  <div>
+    <h2 class="grande">Olá, <span class="dourado">Ana</span></h2>
+    <div class="sub" id="frase">Carregando o que precisa de você…</div>
+    <div class="stats">
+      <div class="stat ouro" id="st-ana" onclick="ir('s-ana')"><div class="num" id="h-ana">–</div><div class="rot">para decidir</div></div>
+      <div class="stat ouro" id="st-prop" onclick="ir('s-propostas')"><div class="num" id="h-prop">–</div><div class="rot">para avaliar</div></div>
+      <div class="stat azul" onclick="ir('s-debate')"><div class="num" id="h-deb">–</div><div class="rot">em debate</div></div>
+      <div class="stat azul" onclick="ir('s-pend')"><div class="num" id="h-pend">–</div><div class="rot">pendências</div></div>
+    </div>
+    <div class="abrir"><button class="pri" onclick="abrirDebate()">＋ Abrir debate na Mesa</button></div>
+  </div>
+</div>
+
+<main>
+  <section class="destaque" id="s-ana">
+    <h2>🧭 Para você decidir agora <span class="n" id="n-ana">0</span></h2>
+    <div class="grade" id="ana"></div>
+  </section>
+  <section id="s-propostas">
+    <h2>🟡 Propostas para avaliar <span class="n" id="n-prop">0</span></h2>
+    <div class="grade lista" id="propostas"></div>
+  </section>
+  <section id="s-debate">
+    <h2>💬 Em debate na Mesa <span class="n" id="n-deb">0</span></h2>
+    <div class="grade" id="debate"></div>
+  </section>
+  <section id="s-pend">
+    <h2>🔴 Pendências <span class="n" id="n-pend">0</span></h2>
+    <div class="grade lista" id="pendencias"></div>
+  </section>
+  <section>
+    <h2>✅ Decididas recentemente</h2>
+    <div id="decididas"></div>
+  </section>
+  <section>
+    <h2>⚙️ Este aparelho</h2>
+    <div class="acoes">
+      <button id="btn-teste" onclick="testarPush()">Enviar notificação de teste</button>
+      <button onclick="sair()">Sair</button>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="fundo" id="fundo">
+  <div class="modal">
+    <h3 id="m-titulo"></h3>
+    <div class="sub" id="m-sub"></div>
+    <div id="m-campos"></div>
+    <div class="acoes" style="justify-content:flex-end">
+      <button onclick="fechar()">Cancelar</button>
+      <button class="pri" id="m-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script>
+const SUPA = 'https://mvqrzkysicjmlpmkvurb.supabase.co'
+const CHAVE_PUBLICA = 'sb_publishable_1NP6OhmergtpeF1THhHRlA_Rm4itZdw'
+const API = SUPA + '/functions/v1/central'
+const EMAIL = 'electramidias@gmail.com'
+const sb = supabase.createClient(SUPA, CHAVE_PUBLICA, { auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true } })
+
+const $ = s => document.querySelector(s)
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))
+const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+const instalado = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+let ESTADO = null
+
+// ---------------------------------------------------------------- login (código de 6+ dígitos no e-mail: funciona dentro do app do iPhone)
+function telaLogin(html) { $('#app').classList.remove('on'); $('#login').classList.add('on'); $('#login-corpo').innerHTML = html }
+function pedirEmail(msg) {
+  telaLogin(`<p>${msg || 'Entre com o seu e-mail. Vamos mandar um código de acesso.'}</p>
+    <input id="email" type="email" value="${EMAIL}" autocomplete="email">
+    <button class="pri" id="enviar">Enviar código</button>`)
+  $('#enviar').onclick = async () => {
+    const email = $('#email').value.trim().toLowerCase()
+    if (email !== EMAIL) return pedirEmail('Esta Central é só da Ana.')
+    $('#enviar').disabled = true
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname } })
+    if (error) return pedirEmail(esc(error.message))
+    pedirCodigo(email)
+  }
+}
+function pedirCodigo(email) {
+  telaLogin(`<p>Enviamos um e-mail. Digite aqui o <b>código</b> que veio nele.<br><small>No computador, você também pode só clicar no link do e-mail.</small></p>
+    <input id="codigo" inputmode="numeric" autocomplete="one-time-code" placeholder="código" maxlength="10">
+    <button class="pri" id="entrar">Entrar</button>
+    <button id="voltar">Mandar de novo</button>`)
+  $('#codigo').focus()
+  $('#voltar').onclick = () => pedirEmail()
+  $('#entrar').onclick = async () => {
+    const token = $('#codigo').value.replace(/\D/g, '')
+    if (token.length < 6) return toast('Digite o código completo.', true)
+    $('#entrar').disabled = true
+    const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) { $('#entrar').disabled = false; return toast('Código inválido ou vencido. Peça outro.', true) }
+    iniciar()
+  }
+}
+async function sessao() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (session && (session.user.email || '').toLowerCase() !== EMAIL) { await sb.auth.signOut(); return null }
+  return session
+}
+async function sair() { await sb.auth.signOut(); pedirEmail() }
+
+// ---------------------------------------------------------------- API
+async function api(rota, corpo) {
+  const s = await sessao()
+  if (!s) { pedirEmail(); throw new Error('login') }
+  const r = await fetch(API + rota, {
+    method: corpo ? 'POST' : 'GET',
+    headers: { Authorization: 'Bearer ' + s.access_token, apikey: CHAVE_PUBLICA, ...(corpo ? { 'Content-Type': 'application/json' } : {}) },
+    body: corpo ? JSON.stringify(corpo) : undefined,
+  })
+  if (r.status === 401) { await sb.auth.signOut(); pedirEmail('Sua sessão venceu. Entre de novo.'); throw new Error('login') }
+  return r.json()
+}
+
+// ---------------------------------------------------------------- tela
+function md(t) {
+  let h = esc(t || "")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/\[\[([^\]|]+)\|?([^\]]*)\]\]/g, (_, a, b) => "<i>" + (b || a.split("/").pop()) + "</i>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+  return h.split(/\n{2,}/).map(p => "<p>" + p.replace(/\n/g, "<br>") + "</p>").join("");
+}
+const NOME = {claude: "Claude", codex: "Codex", chatgpt: "ChatGPT", ana: "você", "-": "—"};
+let ITENS = [];
+function botao(modo, item, classe, rotulo) {
+  ITENS.push({arquivo: item.arquivo, titulo: item.titulo});
+  return `<button class="${classe}" data-modo="${modo}" data-i="${ITENS.length - 1}">${rotulo}</button>`;
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-modo]");
+  if (!b) return;
+  const it = ITENS[+b.dataset.i];
+  if (it) abrir(b.dataset.modo, it.arquivo, it.titulo);
+});
+function ir(id) { document.getElementById(id).scrollIntoView({behavior: "smooth", block: "start"}); }
+function toast(msg, erro) {
+  const t = $("#toast"); t.textContent = msg; t.className = "toast on" + (erro ? " erro" : "");
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = "toast", 4000);
+}
+
+function cartaoPauta(p, paraAna) {
+  const s = p.sintese || p.ultima || {texto: "(sem falas)"};
+  const mostrar = paraAna ? s : (p.ultima || s);
+  const falas = p.falas.map(f => `<div class="fala"><div class="quem">${esc(f.autor)}<i>${esc(f.quando)}${f.posicao ? " · " + esc(f.posicao) : ""}</i></div>
+      <div class="corpo">${esc(f.texto)}</div></div>`).join("");
+  const id = "d" + ITENS.length + "_" + Math.random().toString(36).slice(2, 7);
+  return `<div class="cartao">
+    <div class="topo"><span class="tag proj">${esc(p.projeto || "—")}</span>
+      ${paraAna ? "" : `<span class="tag vez">vez: ${esc(NOME[p.vez] || p.vez)}</span>`}
+      <span class="tag">${p.n_falas} falas · ${esc(p.participantes.join(", "))}</span></div>
+    <div class="titulo">${esc(p.titulo)}</div>
+    <div class="meta">${paraAna ? "Síntese das IAs" : "Última fala"} — ${esc(mostrar.autor || "")} ${esc(mostrar.quando || "")}</div>
+    <div class="sintese">${md(mostrar.texto)}</div>
+    <div class="acoes">
+      ${paraAna ? botao("decidir", p, "pri", "✔ Decidir e encerrar") + botao("devolver", p, "", "↩ Devolver para a Mesa") : ""}
+      ${botao("encerrar", p, "no", "✖ Encerrar" + (paraAna ? " sem decisão" : ""))}
+      <button class="link" onclick="document.getElementById('${id}').classList.toggle('on')">ver debate completo</button>
+    </div>
+    <div class="debate" id="${id}">${falas}</div>
+  </div>`;
+}
+function cartaoPendencia(p, tipo) {
+  const botoes = tipo === "avaliar"
+    ? botao("aprovar", p, "ok", "✔ Aprovar") + botao("rejeitar", p, "no", "✖ Rejeitar")
+    : botao("concluir", p, "ok", "✔ Concluir");
+  return `<div class="cartao">
+    <div class="topo"><span class="tag proj">${esc(p.projeto || "—")}</span>
+      <span class="tag">${esc(tipo)}</span>${p.origem ? `<span class="tag">de: ${esc(p.origem)}</span>` : ""}
+      ${p.responsavel ? `<span class="tag">com: ${esc(p.responsavel)}</span>` : ""}</div>
+    <div class="titulo">${esc(p.titulo.replace(/^Proposta [^-]+- /, ""))}</div>
+    <div class="sintese" style="max-height:150px">${md(p.texto)}</div>
+    <div class="acoes">${botoes}</div>
+  </div>`;
+}
+function render(e) {
+  ESTADO = e; ITENS = [];
+  const g = e.pendencias;
+  const pend = [...g.decidir.map(p => [p, "decidir"]), ...g.andamento.map(p => [p, "andamento"]), ...g.parado.map(p => [p, "parado"])];
+  $("#ana").innerHTML = e.para_ana.map(p => cartaoPauta(p, true)).join("") || `<div class="vazio">Nada esperando você. 🎉</div>`;
+  $("#debate").innerHTML = e.em_debate.map(p => cartaoPauta(p, false)).join("") || `<div class="vazio">Nenhuma pauta em debate.</div>`;
+  $("#propostas").innerHTML = g.avaliar.map(p => cartaoPendencia(p, "avaliar")).join("") || `<div class="vazio">Nenhuma proposta para avaliar.</div>`;
+  $("#pendencias").innerHTML = pend.map(([p, t]) => cartaoPendencia(p, t)).join("") || `<div class="vazio">Sem pendências.</div>`;
+  $("#decididas").innerHTML = e.decididas.map(d => `<div class="linha-dec"><div><b>${esc(d.titulo)}</b> · <span style="color:var(--azul)">${esc(d.projeto)}</span></div><span>${esc(d.quando)}</span></div>`).join("") || `<div class="vazio">Nenhuma ainda.</div>`;
+  const n = {ana: e.para_ana.length, prop: g.avaliar.length, deb: e.em_debate.length, pend: pend.length};
+  for (const k in n) { $("#n-" + k).textContent = n[k]; $("#h-" + k).textContent = n[k]; }
+  $("#st-ana").classList.toggle("ativo", n.ana > 0); $("#st-prop").classList.toggle("ativo", n.prop > 0);
+  $("#frase").textContent = n.ana + n.prop === 0 ? "Tudo em dia. As IAs seguem trabalhando na Mesa."
+    : `Você tem ${n.ana} pauta${n.ana === 1 ? "" : "s"} para decidir e ${n.prop} proposta${n.prop === 1 ? "" : "s"} para avaliar.`;
+  $("#atualizado").textContent = "atualizado " + e.agora;
+  const total = n.ana + n.prop + g.decidir.length;
+  try { if (navigator.setAppBadge) total ? navigator.setAppBadge(total) : navigator.clearAppBadge() } catch {}
+}
+async function carregar() {
+  if ($("#fundo").classList.contains("on") || document.hidden) return;
+  try { render(await api("/estado")) } catch (e) { if (e.message !== 'login') $("#atualizado").textContent = "sem conexão" }
+}
+
+// ---------------------------------------------------------------- ações
+const IA_OPCOES = `<option value="claude">Claude</option><option value="codex">Codex</option><option value="chatgpt">ChatGPT</option>`
+const MODOS = {
+  decidir:  {t: "Decidir e encerrar", api: "pauta-decidir", campos: `<label>Sua decisão</label><textarea id="f-decisao" placeholder="Ex.: Caminho B. Histórico fora do OneDrive, registro diário."></textarea><label>Motivo (opcional)</label><textarea id="f-motivo" style="min-height:60px"></textarea>`, sub: "A decisão vai para as Decisões do projeto e a pauta é encerrada."},
+  devolver: {t: "Devolver para a Mesa", api: "pauta-devolver", campos: `<label>O que você quer que as IAs vejam</label><textarea id="f-comentario" placeholder="Ex.: Comparem também o custo de cada caminho."></textarea><label>Quem fala primeiro</label><select id="f-para">${IA_OPCOES}</select>`, sub: "A pauta volta para o rodízio com o seu comentário."},
+  encerrar: {t: "Encerrar pauta", api: "pauta-encerrar", campos: `<label>Motivo (opcional)</label><textarea id="f-motivo" style="min-height:60px"></textarea>`, sub: "A pauta fecha sem registrar decisão. Nada é apagado."},
+  aprovar:  {t: "Aprovar proposta", api: "pendencia-aprovar", campos: `<label>Comentário (opcional)</label><textarea id="f-comentario" style="min-height:60px"></textarea>`, sub: "Vira uma decisão registrada no projeto."},
+  rejeitar: {t: "Rejeitar proposta", api: "pendencia-rejeitar", campos: `<label>Motivo (opcional)</label><textarea id="f-motivo" style="min-height:60px"></textarea>`, sub: "Fica no histórico como rejeitada."},
+  concluir: {t: "Concluir pendência", api: "pendencia-concluir", campos: `<label>Observação (opcional)</label><textarea id="f-nota" style="min-height:60px"></textarea>`, sub: "Sai da lista de pendências; fica no histórico."},
+};
+function janela(titulo, sub, campos, enviar) {
+  $("#m-titulo").textContent = titulo; $("#m-sub").textContent = sub;
+  $("#m-campos").innerHTML = campos; $("#fundo").classList.add("on");
+  $("#m-ok").disabled = false;
+  $("#m-ok").onclick = async () => {
+    const corpo = {};
+    for (const el of document.querySelectorAll("#m-campos [id^=f-]")) corpo[el.id.slice(2)] = el.value;
+    $("#m-ok").disabled = true;
+    try {
+      const j = await enviar(corpo);
+      if (j.ok) { fechar(); toast("✓ " + j.mensagem) } else { $("#m-ok").disabled = false; toast(j.mensagem, true) }
+    } catch (e) { $("#m-ok").disabled = false; if (e.message !== 'login') toast("Sem conexão. Tente de novo.", true) }
+  };
+  setTimeout(() => { const t = document.querySelector("#m-campos input, #m-campos textarea"); if (t && !iOS) t.focus(); }, 50);
+}
+function abrir(modo, arquivo, titulo) {
+  const m = MODOS[modo];
+  janela(m.t, titulo + " — " + m.sub, m.campos, corpo => api("/acao/" + m.api, {arquivo, ...corpo}));
+}
+function abrirDebate() {
+  const projs = ["Cérebro", ...((ESTADO && ESTADO.projetos) || []).filter(p => p !== "Cérebro")];
+  janela("Abrir debate na Mesa", "As IAs debatem e devolvem para você com uma síntese. O Claude e o ChatGPT olham a Mesa de hora em hora.",
+    `<label>Tema</label><input id="f-tema" placeholder="Ex.: Vale trocar o servidor do atendente?">
+     <label>Projeto</label><select id="f-projeto">${projs.map(p => `<option>${esc(p)}</option>`).join("")}</select>
+     <label>O que você quer que elas analisem</label><textarea id="f-contexto" placeholder="Contexto, dúvida, opções que você está pensando…"></textarea>
+     <label>Quem começa</label><select id="f-para">${IA_OPCOES}</select>`,
+    corpo => api("/acao/abrir-debate", corpo));
+}
+function fechar() { $("#fundo").classList.remove("on"); carregar(); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") fechar(); });
+
+// ---------------------------------------------------------------- notificações
+const b64uParaBytes = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
+async function sw() { return 'serviceWorker' in navigator ? navigator.serviceWorker.register('sw.js') : null }
+async function situacaoPush() {
+  $('#aviso-instalar').hidden = !(iOS && !instalado);
+  const pode = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  if (!pode) { $('#aviso-push').hidden = true; return }
+  const reg = await sw();
+  const sub = reg && await reg.pushManager.getSubscription();
+  $('#aviso-push').hidden = !!(sub && Notification.permission === 'granted');
+  if (sub && Notification.permission === 'granted') api('/push/assinar', { assinatura: sub.toJSON(), aparelho: iOS ? 'iPhone' : navigator.platform }).catch(() => {});
+}
+async function ativarPush() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return toast('Notificações não autorizadas. Ative em Ajustes → Notificações → Cérebro.', true);
+    const reg = await sw(); await navigator.serviceWorker.ready;
+    const { chave } = await api('/push/chave');
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uParaBytes(chave) });
+    const j = await api('/push/assinar', { assinatura: sub.toJSON(), aparelho: iOS ? 'iPhone' : navigator.platform });
+    toast(j.ok ? '✓ ' + j.mensagem : j.mensagem, !j.ok); situacaoPush();
+  } catch (e) { if (e.message !== 'login') toast('Não consegui ativar: ' + e.message, true) }
+}
+async function testarPush() {
+  $('#btn-teste').disabled = true;
+  try { const j = await api('/push/teste', {}); toast(j.ok ? '✓ ' + j.mensagem : j.mensagem, !j.ok) } catch {}
+  $('#btn-teste').disabled = false;
+}
+$('#btn-push').onclick = ativarPush;
+
+// ---------------------------------------------------------------- início
+async function iniciar() {
+  const s = await sessao();
+  if (!s) return pedirEmail();
+  $('#login').classList.remove('on'); $('#app').classList.add('on');
+  if (location.search || location.hash) history.replaceState(null, '', location.pathname);
+  carregar(); situacaoPush();
+}
+sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_IN' && !$('#app').classList.contains('on')) iniciar() });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar() });
+setInterval(carregar, 60000);
+sw(); iniciar();
+</script>
+</body>
+</html>
