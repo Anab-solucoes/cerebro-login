@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portão do Cérebro</title>
+<style>
+  :root { --fundo:#0b0b0d; --cartao:#15151a; --ouro:#d4af37; --azul:#3b82f6; --texto:#f2f2f2; --suave:#a3a3a3; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--fundo); color:var(--texto);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding:16px; }
+  .cartao { width:100%; max-width:420px; background:var(--cartao); border:1px solid #2a2a33; border-radius:16px; padding:28px; }
+  h1 { margin:0 0 4px; font-size:22px; color:var(--ouro); }
+  p { color:var(--suave); margin:8px 0 18px; }
+  input { width:100%; padding:12px; border-radius:10px; border:1px solid #333; background:#0f0f13; color:var(--texto); font-size:16px; }
+  button { width:100%; padding:12px; border:0; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; margin-top:12px; }
+  .ok { background:var(--ouro); color:#111; } .nao { background:transparent; color:var(--suave); border:1px solid #333; }
+  .info { background:#0f0f13; border-radius:10px; padding:12px; font-size:14px; color:var(--suave); }
+  .info b { color:var(--texto); }
+  .erro { color:#f87171; }
+</style>
+</head>
+<body>
+<main class="cartao" id="app"><h1>Portão do Cérebro</h1><p>Carregando…</p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script>
+const SUPA = 'https://mvqrzkysicjmlpmkvurb.supabase.co'
+const CHAVE_PUBLICA = 'sb_publishable_1NP6OhmergtpeF1THhHRlA_Rm4itZdw'
+const EMAIL = 'electramidias@gmail.com'
+const sb = supabase.createClient(SUPA, CHAVE_PUBLICA, { auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true } })
+const app = document.getElementById('app')
+const params = new URLSearchParams(location.search)
+const authId = params.get('authorization_id') || sessionStorage.getItem('authorization_id')
+if (params.get('authorization_id')) sessionStorage.setItem('authorization_id', params.get('authorization_id'))
+const tela = (html) => { app.innerHTML = '<h1>Portão do Cérebro</h1>' + html }
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]))
+
+async function iniciar() {
+  if (!authId) return tela('<p class="erro">Pedido de acesso inválido. Volte ao ChatGPT ou ao Claude e conecte de novo.</p>')
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) return pedirLogin()
+  if ((session.user.email || '').toLowerCase() !== EMAIL) {
+    await sb.auth.signOut()
+    return tela('<p class="erro">Este Portão é só da Ana.</p>')
+  }
+  const { data, error } = await sb.auth.oauth.getAuthorizationDetails(authId)
+  if (error) return tela(`<p class="erro">${esc(error.message)}</p>`)
+  if (!('authorization_id' in data)) { sessionStorage.removeItem('authorization_id'); return location.replace(data.redirect_url) }
+  tela(`<p>Um aplicativo quer acessar o seu Cérebro (Mesa de Debate e Painel).</p>
+    <div class="info"><b>Quem pede:</b> ${esc(data.client?.name || data.client?.client_name || 'aplicativo')}<br>
+    <b>Volta para:</b> ${esc(data.redirect_uri)}</div>
+    <button class="ok" id="sim">Permitir</button><button class="nao" id="nao">Recusar</button>`)
+  document.getElementById('sim').onclick = () => decidir(true)
+  document.getElementById('nao').onclick = () => decidir(false)
+}
+async function decidir(aprovar) {
+  const r = aprovar ? await sb.auth.oauth.approveAuthorization(authId) : await sb.auth.oauth.denyAuthorization(authId)
+  if (r.error) return tela(`<p class="erro">${esc(r.error.message)}</p>`)
+  sessionStorage.removeItem('authorization_id')
+  location.replace(r.data.redirect_url)
+}
+function pedirLogin() {
+  tela(`<p>Entre com o seu e-mail. Vamos mandar um link de acesso.</p>
+    <input id="email" type="email" value="${EMAIL}" autocomplete="email">
+    <button class="ok" id="enviar">Enviar link</button>`)
+  document.getElementById('enviar').onclick = async () => {
+    const email = document.getElementById('email').value.trim().toLowerCase()
+    if (email !== EMAIL) return tela('<p class="erro">Este Portão é só da Ana.</p>')
+    const volta = location.origin + location.pathname + '?authorization_id=' + encodeURIComponent(authId)
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: volta } })
+    tela(error ? `<p class="erro">${esc(error.message)}</p>` : '<p>Pronto! Abra o e-mail que chegou e clique no link <b>neste mesmo navegador</b>.</p>')
+  }
+}
+sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_IN') iniciar() })
+iniciar()
+</script>
+</body>
+</html>
