@@ -224,6 +224,7 @@
     <h2>⚙️ Este aparelho</h2>
     <div class="acoes">
       <button id="btn-teste" onclick="testarPush()">Enviar notificação de teste</button>
+      <button onclick="definirSenha()">Criar ou trocar a senha</button>
       <button onclick="sair()">Sair</button>
     </div>
   </section>
@@ -259,16 +260,47 @@ let ESTADO = null
 
 // ---------------------------------------------------------------- login (código de 6+ dígitos no e-mail: funciona dentro do app do iPhone)
 function telaLogin(html) { $('#app').classList.remove('on'); $('#login').classList.add('on'); $('#login-corpo').innerHTML = html }
-function pedirEmail(msg) {
-  telaLogin(`<p>${msg || 'Entre com o seu e-mail. Vamos mandar um código de acesso.'}</p>
+function pedirSenha(msg) {
+  telaLogin(`<p>${msg || 'Entre com o seu e-mail e a sua senha da Central.'}</p>
+    <input id="email" type="email" value="${EMAIL}" autocomplete="username">
+    <input id="senha" type="password" placeholder="senha" autocomplete="current-password">
+    <button class="pri" id="entrar">Entrar</button>
+    <button id="por-email">Entrar pelo e-mail (link)</button>`)
+  $('#por-email').onclick = () => pedirEmailLink()
+  $('#senha').onkeydown = e => { if (e.key === 'Enter') $('#entrar').click() }
+  $('#entrar').onclick = async () => {
+    const email = $('#email').value.trim().toLowerCase()
+    if (email !== EMAIL) return pedirSenha('Esta Central é só da Ana.')
+    const password = $('#senha').value
+    if (!password) return toast('Digite a senha.', true)
+    $('#entrar').disabled = true
+    const { error } = await sb.auth.signInWithPassword({ email, password })
+    if (error) { $('#entrar').disabled = false; return toast('E-mail ou senha não conferem.', true) }
+    iniciar()
+  }
+}
+function pedirEmail(msg) { pedirSenha(msg) }
+function definirSenha() {
+  janela("Criar ou trocar a senha", "Com a senha você entra no app do iPhone sem precisar do e-mail. Use pelo menos 8 caracteres.",
+    `<label>Nova senha</label><input id="f-senha" type="password" autocomplete="new-password">
+     <label>Repita a senha</label><input id="f-senha2" type="password" autocomplete="new-password">`,
+    async c => {
+      if ((c.senha || '').length < 8) return { ok: false, mensagem: 'A senha precisa ter pelo menos 8 caracteres.' }
+      if (c.senha !== c.senha2) return { ok: false, mensagem: 'As duas senhas estão diferentes.' }
+      const { error } = await sb.auth.updateUser({ password: c.senha })
+      return error ? { ok: false, mensagem: error.message } : { ok: true, mensagem: 'Senha salva. Já pode entrar com ela no iPhone.' }
+    })
+}
+function pedirEmailLink(msg) {
+  telaLogin(`<p>${msg || 'Vamos mandar um link para o seu e-mail. Abra o link neste mesmo aparelho e navegador.'}</p>
     <input id="email" type="email" value="${EMAIL}" autocomplete="email">
     <button class="pri" id="enviar">Enviar código</button>`)
   $('#enviar').onclick = async () => {
     const email = $('#email').value.trim().toLowerCase()
-    if (email !== EMAIL) return pedirEmail('Esta Central é só da Ana.')
+    if (email !== EMAIL) return pedirEmailLink('Esta Central é só da Ana.')
     $('#enviar').disabled = true
     const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname } })
-    if (error) return pedirEmail(esc(error.message))
+    if (error) return pedirEmailLink(esc(error.message))
     pedirCodigo(email)
   }
 }
